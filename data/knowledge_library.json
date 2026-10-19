@@ -1,0 +1,18 @@
+[
+  {
+    "id": "doc-1792421497472-q85zd",
+    "userId": "testuser1",
+    "title": "Test Bio Chapter",
+    "bookName": "Biology 10",
+    "subject": "general",
+    "classLevel": "General Academic",
+    "chapter": "General Chapter",
+    "fileType": "pdf",
+    "fileName": "document.pdf",
+    "extractedText": "Mitochondria is the powerhouse of the cell.",
+    "wordCount": 7,
+    "fileSizeBytes": 43,
+    "createdAt": 1792421497472,
+    "updatedAt": 1792421497472
+  }
+]

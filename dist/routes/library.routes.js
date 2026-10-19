@@ -1,0 +1,10 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const library_controller_1 = require("../controllers/library.controller");
+const router = (0, express_1.Router)();
+router.get("/", library_controller_1.getLibraryController);
+router.post("/", library_controller_1.saveLibraryController);
+router.delete("/:id", library_controller_1.deleteLibraryController);
+router.post("/search", library_controller_1.searchLibraryController);
+exports.default = router;
