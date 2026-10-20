@@ -1,6 +1,17 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
 
+// Ensure DOM / Canvas polyfills for headless serverless environments (Vercel)
+if (typeof (globalThis as any).DOMMatrix === "undefined") {
+  (globalThis as any).DOMMatrix = class DOMMatrix {};
+}
+if (typeof (globalThis as any).ImageData === "undefined") {
+  (globalThis as any).ImageData = class ImageData {};
+}
+if (typeof (globalThis as any).Path2D === "undefined") {
+  (globalThis as any).Path2D = class Path2D {};
+}
+
 import aiRoutes from "./routes/ai.routes";
 import teacherRoutes from "./routes/teacher.routes";
 import studentRoutes from "./routes/student.routes";
@@ -22,6 +33,16 @@ app.use(express.urlencoded({ extended: true, limit: "20mb" }));
 app.use(requestLogger);
 
 // Health check endpoints
+app.get("/", (_req: Request, res: Response) => {
+  res.json({
+    status: "ok",
+    service: "FAI AVENIQ Educational AI Backend Service",
+    version: "1.0.0",
+    health: "/health",
+    aiHealth: "/api/ai/health",
+  });
+});
+
 app.get("/health", (_req: Request, res: Response) => {
   res.json({
     status: "ok",

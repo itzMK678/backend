@@ -11,6 +11,16 @@ export function loadLibraryFromDisk(): StoredLibraryDoc[] {
       fs.mkdirSync(DATA_DIR, { recursive: true });
     }
     if (!fs.existsSync(LIBRARY_FILE)) {
+      const seedFile = path.resolve(process.cwd(), "data", "knowledge_library.json");
+      if (fs.existsSync(seedFile)) {
+        try {
+          const seedContent = fs.readFileSync(seedFile, "utf-8");
+          fs.writeFileSync(LIBRARY_FILE, seedContent, "utf-8");
+          return JSON.parse(seedContent) || [];
+        } catch {
+          // fallback to empty
+        }
+      }
       fs.writeFileSync(LIBRARY_FILE, JSON.stringify([]), "utf-8");
       return [];
     }

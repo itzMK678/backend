@@ -5,6 +5,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const cors_1 = __importDefault(require("cors"));
+// Ensure DOM / Canvas polyfills for headless serverless environments (Vercel)
+if (typeof globalThis.DOMMatrix === "undefined") {
+    globalThis.DOMMatrix = class DOMMatrix {
+    };
+}
+if (typeof globalThis.ImageData === "undefined") {
+    globalThis.ImageData = class ImageData {
+    };
+}
+if (typeof globalThis.Path2D === "undefined") {
+    globalThis.Path2D = class Path2D {
+    };
+}
 const ai_routes_1 = __importDefault(require("./routes/ai.routes"));
 const teacher_routes_1 = __importDefault(require("./routes/teacher.routes"));
 const student_routes_1 = __importDefault(require("./routes/student.routes"));
@@ -21,6 +34,15 @@ app.use(express_1.default.json({ limit: "20mb" }));
 app.use(express_1.default.urlencoded({ extended: true, limit: "20mb" }));
 app.use(request_logger_1.requestLogger);
 // Health check endpoints
+app.get("/", (_req, res) => {
+    res.json({
+        status: "ok",
+        service: "FAI AVENIQ Educational AI Backend Service",
+        version: "1.0.0",
+        health: "/health",
+        aiHealth: "/api/ai/health",
+    });
+});
 app.get("/health", (_req, res) => {
     res.json({
         status: "ok",

@@ -35,28 +35,49 @@ var __importStar = (this && this.__importStar) || (function () {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.extractTextFromPdfBuffer = extractTextFromPdfBuffer;
 exports.parseDocumentPayload = parseDocumentPayload;
-const pdfParseModule = __importStar(require("pdf-parse"));
+// Polyfills for serverless environments (e.g. Vercel Linux) where canvas/DOMMatrix is absent
+if (typeof globalThis.DOMMatrix === "undefined") {
+    globalThis.DOMMatrix = class DOMMatrix {
+    };
+}
+if (typeof globalThis.ImageData === "undefined") {
+    globalThis.ImageData = class ImageData {
+    };
+}
+if (typeof globalThis.Path2D === "undefined") {
+    globalThis.Path2D = class Path2D {
+    };
+}
 /**
  * Robust helper to extract text from a PDF Buffer.
  * Supports both pdf-parse v2 class constructor (new PDFParse({ data }))
  * and pdf-parse v1 function invocation, plus fallback text extraction.
  */
 async function extractTextFromPdfBuffer(buffer) {
-    // 1. Try class-based PDFParse (pdf-parse v2)
+    let pdfParseModule = null;
     try {
-        const PDFParseClass = pdfParseModule.PDFParse;
-        if (typeof PDFParseClass === "function") {
-            const parser = new PDFParseClass({ data: buffer });
-            await parser.load();
-            const res = await parser.getText();
-            if (typeof res === "string" && res.trim())
-                return res.trim();
-            if (res && typeof res.text === "string" && res.text.trim())
-                return res.text.trim();
-        }
+        pdfParseModule = await Promise.resolve().then(() => __importStar(require("pdf-parse")));
     }
-    catch (err) {
-        console.warn("PDFParse class extraction attempt:", err?.message || err);
+    catch (impErr) {
+        console.warn("Dynamic import of pdf-parse failed:", impErr?.message || impErr);
+    }
+    // 1. Try class-based PDFParse (pdf-parse v2)
+    if (pdfParseModule) {
+        try {
+            const PDFParseClass = pdfParseModule.PDFParse;
+            if (typeof PDFParseClass === "function") {
+                const parser = new PDFParseClass({ data: buffer });
+                await parser.load();
+                const res = await parser.getText();
+                if (typeof res === "string" && res.trim())
+                    return res.trim();
+                if (res && typeof res.text === "string" && res.text.trim())
+                    return res.text.trim();
+            }
+        }
+        catch (err) {
+            console.warn("PDFParse class extraction attempt:", err?.message || err);
+        }
     }
     // 2. Try function-based pdfParse (pdf-parse v1)
     try {

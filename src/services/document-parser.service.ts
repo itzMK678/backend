@@ -1,4 +1,13 @@
-import * as pdfParseModule from "pdf-parse";
+// Polyfills for serverless environments (e.g. Vercel Linux) where canvas/DOMMatrix is absent
+if (typeof (globalThis as any).DOMMatrix === "undefined") {
+  (globalThis as any).DOMMatrix = class DOMMatrix {};
+}
+if (typeof (globalThis as any).ImageData === "undefined") {
+  (globalThis as any).ImageData = class ImageData {};
+}
+if (typeof (globalThis as any).Path2D === "undefined") {
+  (globalThis as any).Path2D = class Path2D {};
+}
 
 /**
  * Robust helper to extract text from a PDF Buffer.
@@ -6,18 +15,27 @@ import * as pdfParseModule from "pdf-parse";
  * and pdf-parse v1 function invocation, plus fallback text extraction.
  */
 export async function extractTextFromPdfBuffer(buffer: Buffer): Promise<string> {
-  // 1. Try class-based PDFParse (pdf-parse v2)
+  let pdfParseModule: any = null;
   try {
-    const PDFParseClass = (pdfParseModule as any).PDFParse;
-    if (typeof PDFParseClass === "function") {
-      const parser = new PDFParseClass({ data: buffer });
-      await parser.load();
-      const res = await parser.getText();
-      if (typeof res === "string" && res.trim()) return res.trim();
-      if (res && typeof res.text === "string" && res.text.trim()) return res.text.trim();
+    pdfParseModule = await import("pdf-parse");
+  } catch (impErr: any) {
+    console.warn("Dynamic import of pdf-parse failed:", impErr?.message || impErr);
+  }
+
+  // 1. Try class-based PDFParse (pdf-parse v2)
+  if (pdfParseModule) {
+    try {
+      const PDFParseClass = (pdfParseModule as any).PDFParse;
+      if (typeof PDFParseClass === "function") {
+        const parser = new PDFParseClass({ data: buffer });
+        await parser.load();
+        const res = await parser.getText();
+        if (typeof res === "string" && res.trim()) return res.trim();
+        if (res && typeof res.text === "string" && res.text.trim()) return res.text.trim();
+      }
+    } catch (err: any) {
+      console.warn("PDFParse class extraction attempt:", err?.message || err);
     }
-  } catch (err: any) {
-    console.warn("PDFParse class extraction attempt:", err?.message || err);
   }
 
   // 2. Try function-based pdfParse (pdf-parse v1)

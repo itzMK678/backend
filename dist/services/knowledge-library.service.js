@@ -16,6 +16,17 @@ function loadLibraryFromDisk() {
             fs_1.default.mkdirSync(DATA_DIR, { recursive: true });
         }
         if (!fs_1.default.existsSync(LIBRARY_FILE)) {
+            const seedFile = path_1.default.resolve(process.cwd(), "data", "knowledge_library.json");
+            if (fs_1.default.existsSync(seedFile)) {
+                try {
+                    const seedContent = fs_1.default.readFileSync(seedFile, "utf-8");
+                    fs_1.default.writeFileSync(LIBRARY_FILE, seedContent, "utf-8");
+                    return JSON.parse(seedContent) || [];
+                }
+                catch {
+                    // fallback to empty
+                }
+            }
             fs_1.default.writeFileSync(LIBRARY_FILE, JSON.stringify([]), "utf-8");
             return [];
         }
