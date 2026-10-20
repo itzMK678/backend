@@ -11,7 +11,7 @@ if (typeof (globalThis as any).ImageData === "undefined") {
 if (typeof (globalThis as any).Path2D === "undefined") {
   (globalThis as any).Path2D = class Path2D {};
 }
-
+// # redesigning all
 import aiRoutes from "./routes/ai.routes";
 import teacherRoutes from "./routes/teacher.routes";
 import studentRoutes from "./routes/student.routes";
