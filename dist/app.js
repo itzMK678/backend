@@ -18,6 +18,8 @@ if (typeof globalThis.Path2D === "undefined") {
     globalThis.Path2D = class Path2D {
     };
 }
+const auth_routes_1 = __importDefault(require("./routes/auth.routes"));
+const chat_routes_1 = __importDefault(require("./routes/chat.routes"));
 const ai_routes_1 = __importDefault(require("./routes/ai.routes"));
 const teacher_routes_1 = __importDefault(require("./routes/teacher.routes"));
 const student_routes_1 = __importDefault(require("./routes/student.routes"));
@@ -59,6 +61,10 @@ app.get("/api/ai/health", (_req, res) => {
         isConfigured: (0, gemini_service_1.isGeminiConfigured)(),
     });
 });
+// Authentication routes (login, signin, register, signup, me)
+app.use("/api/auth", auth_routes_1.default);
+// User-specific chat storage routes (isolated chats per user)
+app.use("/api/chats", chat_routes_1.default);
 // AI and educational API routes
 app.use("/api/ai", ai_routes_1.default);
 app.use("/api/ai/teacher", teacher_routes_1.default);

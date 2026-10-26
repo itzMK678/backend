@@ -13,4 +13,6 @@ export const env = {
 
   ENABLE_WEB_RESEARCH:
     process.env.ENABLE_WEB_RESEARCH === "true",
+
+  JWT_SECRET: process.env.JWT_SECRET || "fai_aveniq_jwt_secret_key_2026_secure",
 };

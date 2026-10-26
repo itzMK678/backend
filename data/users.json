@@ -1,0 +1,20 @@
+[
+  {
+    "id": "usr_1793035384053_b8ea63f9",
+    "name": "Alice Smith",
+    "email": "alice@school.edu",
+    "passwordHash": "4bda09fd27fd45526dbae122204614f3:051b14b0d4bc74d1152781eed6a2f14d9bc53ddfefaa1022d8a1bf6f7f9651291a3a0e9388452c73616531f2eab5f31eb0beb42598a12f9f4f11a46f88d99d0e",
+    "role": "student",
+    "createdAt": 1793035384225,
+    "lastLoginAt": 1793035384225
+  },
+  {
+    "id": "usr_1793035384245_458ee900",
+    "name": "Bob Johnson",
+    "email": "bob@school.edu",
+    "passwordHash": "e08e623c81fa3bd8ea1f4513611d7057:9cf72786588f75d2843a0cac8be85ec4361bd5df121e8458e028dc90c0ea03854141e7fbcc6595d0936272b2f2f672cc9c7918099e9913a4ea4d89fbfd7886d1",
+    "role": "teacher",
+    "createdAt": 1793035384394,
+    "lastLoginAt": 1793035384394
+  }
+]

@@ -1,0 +1,21 @@
+[
+  {
+    "id": "bob-chat-1",
+    "title": "Bob Chemistry Exam",
+    "createdAt": 1793035384408,
+    "updatedAt": 1793035384408,
+    "role": "teacher",
+    "subject": "chemistry",
+    "language": "en",
+    "difficulty": "intermediate",
+    "messages": [
+      {
+        "id": "m2",
+        "role": "user",
+        "content": "Create 10 stoichiometry questions",
+        "timestamp": 1793035384408
+      }
+    ],
+    "userId": "usr_1793035384245_458ee900"
+  }
+]

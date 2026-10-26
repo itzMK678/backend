@@ -11,7 +11,9 @@ if (typeof (globalThis as any).ImageData === "undefined") {
 if (typeof (globalThis as any).Path2D === "undefined") {
   (globalThis as any).Path2D = class Path2D {};
 }
-// # redesigning all
+
+import authRoutes from "./routes/auth.routes";
+import chatRoutes from "./routes/chat.routes";
 import aiRoutes from "./routes/ai.routes";
 import teacherRoutes from "./routes/teacher.routes";
 import studentRoutes from "./routes/student.routes";
@@ -60,6 +62,12 @@ app.get("/api/ai/health", (_req: Request, res: Response) => {
     isConfigured: isGeminiConfigured(),
   });
 });
+
+// Authentication routes (login, signin, register, signup, me)
+app.use("/api/auth", authRoutes);
+
+// User-specific chat storage routes (isolated chats per user)
+app.use("/api/chats", chatRoutes);
 
 // AI and educational API routes
 app.use("/api/ai", aiRoutes);

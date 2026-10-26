@@ -12,4 +12,5 @@ exports.env = {
     NODE_ENV: process.env.NODE_ENV || "development",
     FRONTEND_URL: process.env.FRONTEND_URL || "http://localhost:5173",
     ENABLE_WEB_RESEARCH: process.env.ENABLE_WEB_RESEARCH === "true",
+    JWT_SECRET: process.env.JWT_SECRET || "fai_aveniq_jwt_secret_key_2026_secure",
 };

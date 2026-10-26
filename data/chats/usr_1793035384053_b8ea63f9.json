@@ -1,0 +1,21 @@
+[
+  {
+    "id": "alice-chat-1",
+    "title": "Alice Genetics Study",
+    "createdAt": 1793035384396,
+    "updatedAt": 1793035384396,
+    "role": "student",
+    "subject": "biology",
+    "language": "en",
+    "difficulty": "intermediate",
+    "messages": [
+      {
+        "id": "m1",
+        "role": "user",
+        "content": "What is Mendelian inheritance?",
+        "timestamp": 1793035384396
+      }
+    ],
+    "userId": "usr_1793035384053_b8ea63f9"
+  }
+]
