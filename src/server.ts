@@ -1,22 +1,34 @@
 import http from "http";
 import app from "./app";
 import { env } from "./config/env";
+import { connectDB, disconnectDB } from "./config/db";
 
 const server = http.createServer(app);
 
-server.listen(env.PORT, "0.0.0.0", () => {
-  console.log(`=======================================================`);
-  console.log(`  FAI AVENIQ Educational AI Backend Service`);
-  console.log(`  Running on: http://localhost:${env.PORT}`);
-  console.log(`  Environment: ${env.NODE_ENV}`);
-  console.log(`  Health Check: http://localhost:${env.PORT}/health`);
-  console.log(`  AI Health: http://localhost:${env.PORT}/api/ai/health`);
-  console.log(`=======================================================`);
+async function startServer() {
+  // Connect to MongoDB
+  await connectDB();
+
+  server.listen(env.PORT, "0.0.0.0", () => {
+    console.log(`=======================================================`);
+    console.log(`  FAI AVENIQ Educational AI Backend Service`);
+  
+    console.log(`=======================================================`);
+  });
+}
+
+startServer().catch((err) => {
+  console.error("Failed to start server:", err);
 });
 
-process.on("SIGINT", () => {
+async function shutdown() {
+  console.log("Shutting down FAI AVENIQ backend service...");
+  await disconnectDB();
   server.close(() => {
     console.log("FAI AVENIQ backend service stopped.");
     process.exit(0);
   });
-});
+}
+
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);

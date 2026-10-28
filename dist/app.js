@@ -30,6 +30,7 @@ const library_routes_1 = __importDefault(require("./routes/library.routes"));
 const error_handler_1 = require("./middleware/error-handler");
 const request_logger_1 = require("./middleware/request-logger");
 const gemini_service_1 = require("./services/gemini.service");
+const db_1 = require("./config/db");
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)());
 app.use(express_1.default.json({ limit: "20mb" }));
@@ -50,6 +51,7 @@ app.get("/health", (_req, res) => {
         status: "ok",
         service: "FAI AVENIQ Backend",
         isConfigured: (0, gemini_service_1.isGeminiConfigured)(),
+        database: (0, db_1.getDbStatus)(),
     });
 });
 app.get("/api/ai/health", (_req, res) => {

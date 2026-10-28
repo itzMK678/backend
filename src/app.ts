@@ -25,6 +25,7 @@ import libraryRoutes from "./routes/library.routes";
 import { errorHandler } from "./middleware/error-handler";
 import { requestLogger } from "./middleware/request-logger";
 import { isGeminiConfigured } from "./services/gemini.service";
+import { getDbStatus } from "./config/db";
 
 const app = express();
 
@@ -50,6 +51,7 @@ app.get("/health", (_req: Request, res: Response) => {
     status: "ok",
     service: "FAI AVENIQ Backend",
     isConfigured: isGeminiConfigured(),
+    database: getDbStatus(),
   });
 });
 

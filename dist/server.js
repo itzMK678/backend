@@ -6,19 +6,31 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const http_1 = __importDefault(require("http"));
 const app_1 = __importDefault(require("./app"));
 const env_1 = require("./config/env");
+const db_1 = require("./config/db");
 const server = http_1.default.createServer(app_1.default);
-server.listen(env_1.env.PORT, "0.0.0.0", () => {
-    console.log(`=======================================================`);
-    console.log(`  FAI AVENIQ Educational AI Backend Service`);
-    console.log(`  Running on: http://localhost:${env_1.env.PORT}`);
-    console.log(`  Environment: ${env_1.env.NODE_ENV}`);
-    console.log(`  Health Check: http://localhost:${env_1.env.PORT}/health`);
-    console.log(`  AI Health: http://localhost:${env_1.env.PORT}/api/ai/health`);
-    console.log(`=======================================================`);
+async function startServer() {
+    // Connect to MongoDB
+    await (0, db_1.connectDB)();
+    server.listen(env_1.env.PORT, "0.0.0.0", () => {
+        console.log(`=======================================================`);
+        console.log(`  FAI AVENIQ Educational AI Backend Service`);
+        console.log(`  Running on: http://localhost:${env_1.env.PORT}`);
+        console.log(`  Environment: ${env_1.env.NODE_ENV}`);
+        console.log(`  Health Check: http://localhost:${env_1.env.PORT}/health`);
+        console.log(`  AI Health: http://localhost:${env_1.env.PORT}/api/ai/health`);
+        console.log(`=======================================================`);
+    });
+}
+startServer().catch((err) => {
+    console.error("Failed to start server:", err);
 });
-process.on("SIGINT", () => {
+async function shutdown() {
+    console.log("Shutting down FAI AVENIQ backend service...");
+    await (0, db_1.disconnectDB)();
     server.close(() => {
         console.log("FAI AVENIQ backend service stopped.");
         process.exit(0);
     });
-});
+}
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);

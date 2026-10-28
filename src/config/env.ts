@@ -15,4 +15,10 @@ export const env = {
     process.env.ENABLE_WEB_RESEARCH === "true",
 
   JWT_SECRET: process.env.JWT_SECRET || "fai_aveniq_jwt_secret_key_2026_secure",
+  
+  MONGO_URI:
+    process.env.MONGO_URI ||
+    process.env.MONGODB_URI ||
+    process.env.MongoURL ||
+    "",
 };
