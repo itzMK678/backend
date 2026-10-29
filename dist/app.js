@@ -59,7 +59,7 @@ app.get("/api/ai/health", (_req, res) => {
         status: "ok",
         service: "FAI AVENIQ Engine",
         provider: "gemini",
-        model: "gemini-3.8-flash",
+        model: process.env.GEMINI_MODEL || "gemini-3.5-flash-lite",
         isConfigured: (0, gemini_service_1.isGeminiConfigured)(),
     });
 });

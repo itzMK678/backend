@@ -14,10 +14,6 @@ async function startServer() {
     server.listen(env_1.env.PORT, "0.0.0.0", () => {
         console.log(`=======================================================`);
         console.log(`  FAI AVENIQ Educational AI Backend Service`);
-        console.log(`  Running on: http://localhost:${env_1.env.PORT}`);
-        console.log(`  Environment: ${env_1.env.NODE_ENV}`);
-        console.log(`  Health Check: http://localhost:${env_1.env.PORT}/health`);
-        console.log(`  AI Health: http://localhost:${env_1.env.PORT}/api/ai/health`);
         console.log(`=======================================================`);
     });
 }

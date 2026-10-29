@@ -22,7 +22,7 @@ function isGeminiConfigured() {
     const key = process.env.GEMINI_API_KEY?.trim();
     return Boolean(key && key !== "MY_GEMINI_API_KEY" && key !== "your_gemini_api_key_here");
 }
-async function callGemini(apiKey, req) {
+async function callGemini(apiKey, req, overrideModel) {
     const ai = new genai_1.GoogleGenAI({
         apiKey,
         httpOptions: {
@@ -38,7 +38,7 @@ async function callGemini(apiKey, req) {
             .join("\n\n");
         prompt = `${formatted}\n\nAssistant:`;
     }
-    const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+    const model = overrideModel || process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
     const isImageAttachment = req.attachment?.dataUrl &&
         (req.attachment.type === "image" ||
             req.attachment.dataUrl.startsWith("data:image/") ||
@@ -48,6 +48,10 @@ async function callGemini(apiKey, req) {
             req.attachment.type === "application/pdf" ||
             req.attachment.dataUrl.startsWith("data:application/pdf") ||
             Boolean(req.attachment.name?.match(/\.pdf$/i)));
+    const timeoutMs = 12000;
+    const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error(`Gemini API request timed out after ${timeoutMs}ms`)), timeoutMs);
+    });
     let response;
     if ((isImageAttachment || isPdfAttachment) && req.attachment?.dataUrl) {
         const match = req.attachment.dataUrl.match(/^data:([^;]+);base64,(.+)$/);
@@ -57,39 +61,45 @@ async function callGemini(apiKey, req) {
             (isPdfAttachment
                 ? "Please analyze and explain this attached PDF study material thoroughly with structured clarity."
                 : "Please analyze this educational diagram or image thoroughly with step-by-step clarity.");
-        response = await ai.models.generateContent({
-            model,
-            contents: [
-                {
-                    role: "user",
-                    parts: [
-                        {
-                            inlineData: {
-                                mimeType,
-                                data,
+        response = await Promise.race([
+            ai.models.generateContent({
+                model,
+                contents: [
+                    {
+                        role: "user",
+                        parts: [
+                            {
+                                inlineData: {
+                                    mimeType,
+                                    data,
+                                },
                             },
-                        },
-                        {
-                            text: attachmentPrompt,
-                        },
-                    ],
+                            {
+                                text: attachmentPrompt,
+                            },
+                        ],
+                    },
+                ],
+                config: {
+                    systemInstruction: req.systemInstruction,
+                    temperature: req.temperature ?? 0.7,
                 },
-            ],
-            config: {
-                systemInstruction: req.systemInstruction,
-                temperature: req.temperature ?? 0.7,
-            },
-        });
+            }),
+            timeoutPromise,
+        ]);
     }
     else {
-        response = await ai.models.generateContent({
-            model,
-            contents: prompt,
-            config: {
-                systemInstruction: req.systemInstruction,
-                temperature: req.temperature ?? 0.7,
-            },
-        });
+        response = await Promise.race([
+            ai.models.generateContent({
+                model,
+                contents: prompt,
+                config: {
+                    systemInstruction: req.systemInstruction,
+                    temperature: req.temperature ?? 0.7,
+                },
+            }),
+            timeoutPromise,
+        ]);
     }
     const text = response?.text;
     if (!text) {
@@ -158,27 +168,32 @@ async function generateAIResponse(req, options) {
     }
     const detectedLang = (0, educationalEngine_1.detectLanguage)(query, options?.requestedLang);
     const detectedSub = (0, educationalEngine_1.detectSubject)(query, options?.subject);
+    const primaryModel = process.env.GEMINI_MODEL || "gemini-3.5-flash-lite";
     // 1. Try Google Gemini with official SDK
     try {
         const apiKey = getGeminiApiKey();
-        return await callGemini(apiKey, req);
+        return await callGemini(apiKey, req, primaryModel);
     }
     catch (geminiErr) {
-        console.warn("Gemini call failed, attempting AQA fallback:", geminiErr?.message || geminiErr);
-        // 2. Try Gemini AQA
-        try {
-            const apiKey = getGeminiApiKey();
-            return await callGeminiAqa(apiKey, req);
+        console.warn(`Primary Gemini call (${primaryModel}) failed:`, geminiErr?.message || geminiErr);
+        // If primary model wasn't gemini-3.5-flash-lite and experienced 503/timeout, retry with fast lite model
+        if (primaryModel !== "gemini-3.5-flash-lite") {
+            try {
+                console.info("Retrying with fast reliable fallback model 'gemini-3.5-flash-lite'...");
+                const apiKey = getGeminiApiKey();
+                return await callGemini(apiKey, req, "gemini-3.5-flash-lite");
+            }
+            catch (liteErr) {
+                console.warn("Fast lite fallback model also failed:", liteErr?.message || liteErr);
+            }
         }
-        catch (_aqaErr) {
-            console.warn("AQA fallback failed, using comprehensive curriculum engine:", _aqaErr?.message || _aqaErr);
-            // 3. Graceful educational curriculum fallback
-            const answer = (0, educational_fallback_generator_1.generateDirectEducationalAnswer)(query, detectedLang, detectedSub, (0, educationalEngine_1.detectAcademicLevel)(query, options?.difficulty), options?.role, options?.difficulty);
-            return {
-                text: answer,
-                model: "gemini-3.8-flash (Educational Fallback)",
-                provider: "curriculum",
-            };
-        }
+        // 2. Immediate zero-latency educational curriculum fallback
+        console.info("Using immediate comprehensive curriculum engine fallback.");
+        const answer = (0, educational_fallback_generator_1.generateDirectEducationalAnswer)(query, detectedLang, detectedSub, (0, educationalEngine_1.detectAcademicLevel)(query, options?.difficulty), options?.role, options?.difficulty);
+        return {
+            text: answer,
+            model: `${primaryModel} (Educational Fallback)`,
+            provider: "curriculum",
+        };
     }
 }

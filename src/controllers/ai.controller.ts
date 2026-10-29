@@ -37,7 +37,7 @@ export function healthController(_req: Request, res: Response) {
     status: "ok",
     service: "FAI AVENIQ Engine",
     provider: "gemini",
-    model: "gemini-3.8-flash",
+    model: process.env.GEMINI_MODEL || "gemini-3.5-flash-lite",
     isConfigured,
   });
 }
